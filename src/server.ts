@@ -1,10 +1,29 @@
-import express from "express";
+import express, { type Request } from "express";
 
 const app = express();
 
 app.use(express.json());
 
-let tarefas = [
+type Tarefa = {
+    id: number;
+    titulo: string;
+    concluida: boolean;
+};
+
+type CriarTarefaBody = {
+    titulo: string;
+};
+
+type AtualizarTarefaBody = {
+    titulo: string;
+    concluida: boolean;
+};
+
+type AtualizarStatusBody = {
+    concluida: boolean;
+};
+
+let tarefas: Tarefa[] = [
     {id: 1, titulo: "Estudar TypeScript", concluida: false},
     {id: 2, titulo: "Aprender Express", concluida: false}
 ];
@@ -31,7 +50,7 @@ app.get("/tarefas/:id", (req, res) => {
     res.json(tarefa);
 });
 
-app.post("/tarefas", (req, res) => {
+app.post("/tarefas", (req: Request<{}, {}, CriarTarefaBody>, res) => {
     const { titulo } = req.body;
 
     if (typeof titulo !== "string" || titulo.trim() === "") {
@@ -40,7 +59,7 @@ app.post("/tarefas", (req, res) => {
         });
     }
 
-    const novaTarefa = {
+    const novaTarefa: Tarefa = {
         id: proximoId++,
         titulo: titulo,
         concluida: false
@@ -49,7 +68,7 @@ app.post("/tarefas", (req, res) => {
     return res.status(201).json(novaTarefa);
 });
 
-app.put("/tarefas/:id", (req, res) => {
+app.put("/tarefas/:id", (req: Request<{ id: string }, {}, AtualizarTarefaBody>, res) => {
     const id = Number(req.params.id);
     const tarefa = tarefas.find(tarefa => tarefa.id === id);
 
@@ -74,7 +93,7 @@ app.put("/tarefas/:id", (req, res) => {
     return res.json(tarefa);
 });
 
-app.patch("/tarefas/:id", (req, res) => {
+app.patch("/tarefas/:id", (req: Request<{ id: string }, {}, AtualizarStatusBody>, res) => {
     const id = Number(req.params.id);
     const tarefa = tarefas.find(tarefa => tarefa.id === id);
 
