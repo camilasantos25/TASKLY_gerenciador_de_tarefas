@@ -33,6 +33,13 @@ app.get("/tarefas/:id", (req, res) => {
 
 app.post("/tarefas", (req, res) => {
     const { titulo } = req.body;
+
+    if (typeof titulo !== "string" || titulo.trim() === "") {
+        return res.status(400).json({
+            mensagem: "Informe um título válido!"
+        });
+    }
+
     const novaTarefa = {
         id: proximoId++,
         titulo: titulo,
