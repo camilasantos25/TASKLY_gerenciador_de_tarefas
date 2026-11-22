@@ -40,6 +40,31 @@ app.post("/tarefas", (req, res) => {
     return res.status(201).json(novaTarefa);
 });
 
+app.put("/tarefas/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const tarefa = tarefas.find(tarefa => tarefa.id === id);
+
+    if (!tarefa) {
+        return res.status(404).json({
+            mensagem: "Tarefa não encontrada"
+        });
+    }
+    const { titulo, concluida } = req.body;
+
+    if (
+        typeof titulo !== "string" ||
+        titulo.trim() === "" ||
+        typeof concluida !== "boolean"
+    ) {
+        return res.status(400).json({
+            mensagem: "Informe um titulo válido e concluida como true ou false"
+        });
+    }
+    tarefa.titulo = titulo;
+    tarefa.concluida = concluida;
+    return res.json(tarefa);
+});
+
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000!");
 });
