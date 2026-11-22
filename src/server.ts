@@ -9,6 +9,8 @@ let tarefas = [
     {id: 2, titulo: "Aprender Express", concluida: false}
 ];
 
+let proximoId = 3;
+
 app.get("/", (req, res) => {
     res.send("Minha primeira API Taskly!")
 });
@@ -32,7 +34,7 @@ app.get("/tarefas/:id", (req, res) => {
 app.post("/tarefas", (req, res) => {
     const { titulo } = req.body;
     const novaTarefa = {
-        id: tarefas.length + 1,
+        id: proximoId++,
         titulo: titulo,
         concluida: false
     };
@@ -83,6 +85,21 @@ app.patch("/tarefas/:id", (req, res) => {
     }
     tarefa.concluida = concluida;
     return res.json(tarefa);
+});
+
+app.delete("/tarefas/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const indice = tarefas.findIndex(tarefa => tarefa.id === id);
+
+    if (indice === -1) {
+        return res.status(404).json({
+            mensagem: "Tarefa não encontrada"
+        });
+    }
+    tarefas.splice(indice, 1);
+    return res.status(200).json({
+        mensagem: "Tarefa excluída com sucesso"
+    });
 });
 
 app.listen(3000, () => {
