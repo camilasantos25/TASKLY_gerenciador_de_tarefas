@@ -65,6 +65,26 @@ app.put("/tarefas/:id", (req, res) => {
     return res.json(tarefa);
 });
 
+app.patch("/tarefas/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const tarefa = tarefas.find(tarefa => tarefa.id === id);
+
+    if (!tarefa) {
+        return res.status(404).json({
+            mensagem: "Tarefa não encontrada"
+        });
+    }
+    const { concluida } = req.body;
+
+    if (typeof concluida !== "boolean") {
+        return res.status(400).json({
+            mensagem: "O campo concluida deve ser true ou false"
+        });
+    }
+    tarefa.concluida = concluida;
+    return res.json(tarefa);
+});
+
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000!");
 });
