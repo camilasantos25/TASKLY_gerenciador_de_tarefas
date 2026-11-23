@@ -1,4 +1,6 @@
 import express, { type Request } from "express";
+import "dotenv/config";
+import { prisma } from "./prisma.js";
 
 const app = express();
 
@@ -34,23 +36,35 @@ app.get("/", (req, res) => {
     res.send("Minha primeira API Taskly!")
 });
 
-app.get("/tarefas", (req, res) => {
-    res.json(tarefas);
+app.get("/tarefas", async (req, res) => {
+    const tarefasDoBanco = await prisma.tarefa.findMany();
+    return res.json(tarefasDoBanco);
 });
 
-app.get("/tarefas/:id", (req, res) => {
+app.get("/tarefas/:id", async (req, res) => {
     const id = Number(req.params.id);
-    const tarefa = tarefas.find(tarefa => tarefa.id === id);
+    
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+            mensagem: "Informe um ID válido"
+        });
+    }
 
-    if(!tarefa) {
+    const tarefa = await prisma.tarefa.findUnique({
+        where: {
+            id: id
+        }
+    });
+
+    if (!tarefa) {
         return res.status(404).json({
             mensagem: "Tarefa não encontrada"
         });
     }
-    res.json(tarefa);
+    return res.json(tarefa);
 });
 
-app.post("/tarefas", (req: Request<{}, {}, CriarTarefaBody>, res) => {
+app.post("/tarefas", async (req: Request<{}, {}, CriarTarefaBody>, res) => {
     const { titulo } = req.body;
 
     if (typeof titulo !== "string" || titulo.trim() === "") {
@@ -59,12 +73,11 @@ app.post("/tarefas", (req: Request<{}, {}, CriarTarefaBody>, res) => {
         });
     }
 
-    const novaTarefa: Tarefa = {
-        id: proximoId++,
-        titulo: titulo,
-        concluida: false
-    };
-    tarefas.push(novaTarefa);
+    const novaTarefa = await prisma.tarefa.create({
+        data: {
+            titulo: titulo
+        }
+    });
     return res.status(201).json(novaTarefa);
 });
 
