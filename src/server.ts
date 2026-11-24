@@ -3,6 +3,7 @@ import "dotenv/config";
 import tarefaRoutes from "./routes/tarefa.routes.js";
 import { loggerMiddleware } from "./middlewares/logger.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
+import { notFoundMiddleware } from "./middlewares/notFound.middleware.js";
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/tarefas", tarefaRoutes);
+
+app.use(notFoundMiddleware);
 
 app.use(errorMiddleware);
 
