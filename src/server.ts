@@ -1,6 +1,13 @@
 import express, { type Request } from "express";
 import "dotenv/config";
-import { prisma } from "./prisma.js";
+import {
+    listarTarefas,
+    buscarTarefa,
+    criarTarefa,
+    atualizarTarefa,
+    atualizarStatus,
+    excluirTarefa
+} from "./services/tarefa.service.js";
 
 const app = express();
 
@@ -24,7 +31,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/tarefas", async (req, res) => {
-    const tarefasDoBanco = await prisma.tarefa.findMany();
+    const tarefasDoBanco = await listarTarefas();
     return res.json(tarefasDoBanco);
 });
 
@@ -37,11 +44,7 @@ app.get("/tarefas/:id", async (req, res) => {
         });
     }
 
-    const tarefa = await prisma.tarefa.findUnique({
-        where: {
-            id: id
-        }
-    });
+    const tarefa = await buscarTarefa(id);
 
     if (!tarefa) {
         return res.status(404).json({
@@ -60,11 +63,7 @@ app.post("/tarefas", async (req: Request<{}, {}, CriarTarefaBody>, res) => {
         });
     }
 
-    const novaTarefa = await prisma.tarefa.create({
-        data: {
-            titulo: titulo
-        }
-    });
+    const novaTarefa = await criarTarefa(titulo);
     return res.status(201).json(novaTarefa);
 });
 
@@ -77,11 +76,7 @@ app.put("/tarefas/:id", async (req: Request<{ id: string }, {}, AtualizarTarefaB
         });
     }
 
-    const tarefa = await prisma.tarefa.findUnique({
-        where: {
-            id: id
-        }
-    });
+    const tarefa = await buscarTarefa(id);
 
     if (!tarefa) {
         return res.status(404).json({
@@ -101,15 +96,8 @@ app.put("/tarefas/:id", async (req: Request<{ id: string }, {}, AtualizarTarefaB
         });
     }
     
-    const tarefaAtualizada = await prisma.tarefa.update({
-        where: {
-            id: id
-        },
-        data: {
-            titulo: titulo,
-            concluida: concluida
-        }
-    });
+    const tarefaAtualizada = await atualizarTarefa(id, titulo, concluida);
+    return res.json(tarefaAtualizada);
 });
 
 app.patch("/tarefas/:id", async (req: Request<{ id: string }, {}, AtualizarStatusBody>, res) => {
@@ -121,11 +109,7 @@ app.patch("/tarefas/:id", async (req: Request<{ id: string }, {}, AtualizarStatu
         });
     }
 
-    const tarefa = await prisma.tarefa.findUnique({
-        where: {
-            id: id
-        }
-    });
+    const tarefa = await buscarTarefa(id);
 
     if (!tarefa) {
         return res.status(404).json({
@@ -141,15 +125,7 @@ app.patch("/tarefas/:id", async (req: Request<{ id: string }, {}, AtualizarStatu
         });
     }
     
-    const tarefaAtualizada = await prisma.tarefa.update({
-        where: {
-            id: id
-        },
-        data: {
-            concluida: concluida
-        }
-    });
-
+    const tarefaAtualizada = await atualizarStatus(id, concluida);
     return res.json(tarefaAtualizada);
 });
 
@@ -162,11 +138,7 @@ app.delete("/tarefas/:id", async (req, res) => {
         });
     }
 
-    const tarefa = await prisma.tarefa.findUnique({
-        where: {
-            id: id
-        }
-    });
+    const tarefa = await buscarTarefa(id);
 
     if (!tarefa) {
         return res.status(404).json({
@@ -174,11 +146,7 @@ app.delete("/tarefas/:id", async (req, res) => {
         });
     }
 
-    await prisma.tarefa.delete({
-        where: {
-            id: id
-        }
-    });
+    await excluirTarefa(id);
 
     return res.status(200).json({
         mensagem: "Tarefa excluída com sucesso"
