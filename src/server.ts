@@ -4,6 +4,8 @@ import tarefaRoutes from "./routes/tarefa.routes.js";
 
 const app = express();
 
+const PORT = Number(process.env.PORT) || 3000;
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -12,6 +14,6 @@ app.get("/", (req, res) => {
 
 app.use("/tarefas", tarefaRoutes);
 
-app.listen(3000, () => {
-    console.log("Servidor rodando na porta 3000!");
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}!`);
 });
